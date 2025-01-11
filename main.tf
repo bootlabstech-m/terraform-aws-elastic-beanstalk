@@ -1,5 +1,5 @@
 resource "aws_iam_role" "beanstalk_service" {
-name   = "BeanstalkRole"
+name   = var.beanstalkservicerole_name
 assume_role_policy = <<EOF
 {
  "Version": "2012-10-17",
@@ -20,7 +20,7 @@ EOF
   }
 }
 resource "aws_iam_instance_profile" "instance_profile" {
-  name = "instance_profile"
+  name = var.beanstalk_instance_profile
   role = aws_iam_role.beanstalkrole.name
 }
 
@@ -38,7 +38,7 @@ data "aws_iam_policy_document" "assume_role" {
 }
 
 resource "aws_iam_role" "beanstalkrole" {
-  name               = "beanstalk_role"
+  name               = var.beanstalkrole_name
   path               = "/"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
@@ -60,14 +60,14 @@ resource "random_id" "bucket_id" {
   byte_length = 8
 }
 
-# Elastic Beanstalk Environment
-resource "aws_elastic_beanstalk_environment" "tfenvtest" { 
-  depends_on            = [aws_iam_instance_profile.instance_profile]  
-  name                  = var.env_name
-  application           = aws_elastic_beanstalk_application.my_app.name
-  tier                  = "WebServer"
-  solution_stack_name   = var.solution_stack_name
-}
+# # Elastic Beanstalk Environment
+# resource "aws_elastic_beanstalk_environment" "tfenvtest" { 
+#   depends_on            = [aws_iam_instance_profile.instance_profile]  
+#   name                  = var.env_name
+#   application           = aws_elastic_beanstalk_application.my_app.name
+#   tier                  = "WebServer"
+#   solution_stack_name   = var.solution_stack_name
+# }
 
 # Elastic Beanstalk Application
 resource "aws_elastic_beanstalk_application" "my_app" {
@@ -82,7 +82,7 @@ resource "aws_elastic_beanstalk_application" "my_app" {
 
 # Elastic Beanstalk Application Version
 resource "aws_elastic_beanstalk_application_version" "my_app_version" {
-  name        = "v1"
+  name        = var.app_version_name
   application = aws_elastic_beanstalk_application.my_app.name
   bucket      = aws_s3_bucket.beanstalk_bucket.bucket
   key         = "sample-app.zip"
